@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alarm Clock Setup</title>
+</head>
+<body>
+<style type="text/css">
+<!--
+body {
+  margin: 0;
+  line-height: 1.5;
+}
+h1 {
+  margin: 0;
+}
+label {
+  display: inline-block;
+  min-width: 6em;
+}
+-->
+</style>
+<script type="text/javascript">
+<!--
+(function(element, action, callback) {
+  if (element.addEventListener) {
+    element.addEventListener(action, callback);
+  } else if (element.attachEvent) {
+    element.attachEvent("on" + action, callback);
+  } else {
+    element["on" + action] = callback;
+  }
+})(window, "load", function() {
+  var now = new Date();
+  var offset = now.getTimezoneOffset();
+  if (offset == 0) {
+    offset = (now.getUTCHours() - parseInt(new Intl.DateTimeFormat("en-GB", {"hour": "numeric"}).format(now), 10)) * 60 + (now.getUTCMinutes() - parseInt(new Intl.DateTimeFormat("en-GB", {"minute": "numeric"}).format(now), 10));
+  }
+  var timezone = "UTC" + Math.floor(offset / 60);
+  if (offset % 60 > 0) {
+    timezone += ":" + Math.abs(offset % 60);
+  }
+  document.getElementById("timezone").value = timezone;
+});
+// -->
+</script>
+  <h1>Alarm Clock Setup</h1>
+  <form method="POST" action="/">
+    <label for="ssid">SSID:</label>
+    <input type="text" name="ssid" id="ssid" maxlength="32" /><br />
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="password" maxlength="63" /><br />
+    <label for="timezone">Time Zone:</label>
+    <input type="text" name="timezone" id="timezone" maxlength="63" /><br />
+    <input type="submit" value="Setup">
+  </form>
+</body>
+</html>

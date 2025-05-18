@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alarm Clock Management</title>
+</head>
+<body>
+<style type="text/css">
+<!--
+-->
+</style>
+<script type="text/javascript">
+<!--
+(function() {
+  var addEvent = function(element, action, callback) {
+    if (element.addEventListener) {
+      element.addEventListener(action, callback);
+    } else if (element.attachEvent) {
+      element.attachEvent("on" + action, callback);
+    } else {
+      element["on" + action] = callback;
+    }
+  };
+  var post = function(data, callback) {
+    var req;
+    if (window.XMLHttpRequest) {
+      req = new XMLHttpRequest();
+    } else if (window.ActiveXObject) {
+      try {
+        req = new ActiveXObject("Msxml2.XMLHTTP");
+      } catch (e) {
+        req = new ActiveXObject("Microsoft.XMLHTTP");
+      }
+    }
+    req.onreadystatechange = function() {
+      if (req.readyState == 4 && req.status == 200) {
+        // console.log(req.responseText);
+        if (callback) {
+          callback(req);
+        }
+      }
+    };
+    req.open("POST", "/", true);
+    req.setRequestHeader('Content-type', 'application/json');
+    req.send(data);
+  };
+  addEvent(window, "load", function() {
+    var redElement = document.getElementById("red");
+    var greenElement = document.getElementById("green");
+    var blueElement = document.getElementById("blue");
+    var colorElement = document.getElementById("color");
+    var brightElement = document.getElementById("bright");
+    var compose = function() {
+      colorElement.value = "#" +
+        parseInt(redElement.value, 10).toString(16).padStart(2, "0") +
+        parseInt(greenElement.value).toString(16).padStart(2, "0") +
+        parseInt(blueElement.value).toString(16).padStart(2, "0");
+    };
+    addEvent(redElement, "change", compose);
+    addEvent(greenElement, "change", compose);
+    addEvent(blueElement, "change", compose);
+    var decompose = function() {
+      var color = colorElement.value;
+      if (color.charAt(0) == "#") {
+        color = color.substring(1);
+      }
+      return (function(comp) {
+        return [
+          parseInt(comp[0], 16) % 256,
+          parseInt(comp[1], 16) % 256,
+          parseInt(comp[2], 16) % 256
+        ];
+      })(
+        color.length == 3 ? (function(r, g, b) {
+          return [r + r, g + g, b + b];
+        })(color.charAt(0), color.charAt(1), color.charAt(2)) :
+        [ color.substring(0, 2), color.substring(2, 4), color.substring(4, 6) ]
+      );
+    }
+    addEvent(colorElement, "change", function() {
+      var color = decompose();
+      redElement.value = color[0];
+      greenElement.value = color[1];
+      blueElement.value = color[2];
+    });
+    addEvent(document.getElementById("update"), "click", function() {
+      var color = (function(comp) {
+        return Math.round(comp[0] / 51) +
+          Math.round(comp[1] / 51) * 6 +
+          Math.round(comp[2] / 51) * 36;
+      })(decompose());
+      post(JSON.stringify({color: color, brightness: parseInt(brightElement.value)}));
+    });
+  });
+})();
+// -->
+</script>
+  <h1>Alarm Clock Management</h1>
+  <label for="red">Red:</label>
+  <input id="red" type="range" min="0" max="255" step="51" value="0" /><br />
+  <label for="green">Green:</label>
+  <input id="green" type="range" min="0" max="255" step="51" value="0" /><br />
+  <label for="blue">Blue:</label>
+  <input id="blue" type="range" min="0" max="255" step="51" value="0" /><br />
+  <label for="color">Color:</label>
+  <input id="color" type="color" /><br />
+  <label for="bright">Brightness:</label>
+  <input id="bright" type="range" min="0" max="255" value="128" /><br />
+  <input id="update" type="button" value="Update" />
+</body>
+</html>

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+set -e
+
+find "$(readlink -f "$(dirname "$0")")" \
+  \( -name '*.c' -o -name '*.h' \) -print |
+while read -r file; do
+  indent -linux -l120 -i4 -nut "$file" -o "${file}.new"
+  if [ "$(md5sum "${file}.new" | head -c32)" = "$(md5sum "$file" | head -c32)" ]; then
+    rm "${file}.new"
+  else
+    mv "${file}.new" "$file"
+  fi
+done
+
+if [ ! -w /dev/ttyACM0 ]; then
+  sudo setfacl -m "u:$(id -u):rw" /dev/ttyACM0
+fi
+
+# idf.py -p /dev/ttyACM0 build flash
+idf.py -p /dev/ttyACM0 app app-flash
+
+sudo setfacl -m "u:$(id -u):rw" /dev/ttyACM0
+
+idf.py -p /dev/ttyACM0 monitor
